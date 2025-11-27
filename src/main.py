@@ -25,7 +25,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     is_patch = request.method == "PATCH"
     # Перевіряємо, чи помилка стосується body (loc містить 'body'), а не query параметрів
     has_body_error = any(error.get('loc', [])[0] == 'body' for error in exc.errors())
-    
+
     if is_patch and path_matches and has_body_error:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,

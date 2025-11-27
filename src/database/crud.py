@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from src.database.models import MovieModel, GenreModel, ActorModel, LanguageModel, CountryModel
 from src.schemas import MovieDetailSchema, MovieUpdateRequest
+from src.schemas.movies import MovieCreateDetailSchema
 
 
 async def get_movie_by_id(db: AsyncSession, movie_id: int) -> MovieModel | None:
@@ -26,7 +27,6 @@ async def populate_genres(db: AsyncSession, movie: dict):
     genres = []
     for genre in movie["genres"]:
         genre = await get_or_create_genre(db, genre)
-        print(f"{genre.id=}")
         genres.append(genre)
     movie["genres"] = genres
 
@@ -37,7 +37,6 @@ async def populate_actors(db: AsyncSession, movie: dict):
     actors = []
     for actor in movie["actors"]:
         actor = await get_or_create_actor(db, actor)
-        print(f"{actor.id=}")
         actors.append(actor)
     movie["actors"] = actors
 
@@ -48,7 +47,6 @@ async def populate_languages(db: AsyncSession, movie: dict):
     languages = []
     for language in movie["languages"]:
         language = await get_or_create_language(db, language)
-        print(f"{language.id=}")
         languages.append(language)
     movie["languages"] = languages
 
@@ -57,13 +55,10 @@ async def populate_country(db: AsyncSession, movie: dict):
     if not movie["country"]:
         return
     country = await get_or_create_country(db, movie["country"])
-    print(f"{country.id=}")
     movie["country"] = country
 
 
-async def create_movie(db: AsyncSession, movie: MovieDetailSchema) -> MovieModel:
-    print("create_movie")
-
+async def create_movie(db: AsyncSession, movie: MovieCreateDetailSchema) -> MovieModel:
     new_movie = movie.model_dump()
 
     await populate_genres(db, new_movie)

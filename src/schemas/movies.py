@@ -1,11 +1,20 @@
 import datetime
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import List, Optional
 
 
 class MovieBase(BaseModel):
-    name: str
+    name: str = Field(max_length=255)
     date: datetime.date
+    
+    @field_validator('date')
+    @classmethod
+    def validate_date_not_future(cls, v: datetime.date) -> datetime.date:
+        max_future_date = datetime.date.today() + datetime.timedelta(days=365)
+        if v > max_future_date:
+            raise ValueError("Release date cannot be more than one year in the future.")
+        return v
+    
     score: float = Field(ge=0, le=100)
     overview: str
     status: str
@@ -58,9 +67,24 @@ class MovieDetailSchema(MovieBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class MovieCreateResponseSchema(MovieDetailSchema):
+    id: int
+
+
 class MovieUpdateRequest(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, max_length=255)
     date: Optional[datetime.date] = None
+    
+    @field_validator('date')
+    @classmethod
+    def validate_date_not_future(cls, v: datetime.date | None) -> datetime.date | None:
+        if v is None:
+            return v
+        max_future_date = datetime.date.today() + datetime.timedelta(days=365)
+        if v > max_future_date:
+            raise ValueError("Release date cannot be more than one year in the future.")
+        return v
+    
     score: Optional[float] = Field(None, ge=0, le=100)
     overview: Optional[str] = None
     status: Optional[str] = None

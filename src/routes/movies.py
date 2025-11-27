@@ -7,7 +7,7 @@ from src.database import get_db
 from src.database.crud import create_movie, get_movie_by_id, patch_movie, delete_a_movie
 from src.database.models import MovieModel
 from src.schemas import MovieListResponseSchema, MovieDetailSchema, MovieUpdateRequest
-from src.schemas.movies import MovieCreateDetailSchema, MovieItemSchema
+from src.schemas.movies import MovieCreateDetailSchema, MovieItemSchema, MovieCreateResponseSchema
 
 
 router = APIRouter()
@@ -53,10 +53,10 @@ async def get_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
     return movie
 
 
-@router.post("/movies/", response_model=MovieDetailSchema, status_code=201)
+@router.post("/movies/", response_model=MovieCreateResponseSchema, status_code=201)
 async def add_movie(movie: MovieCreateDetailSchema, db: AsyncSession = Depends(get_db)):
     new_film = await create_movie(db, movie)
-    return MovieDetailSchema.model_validate(new_film)
+    return MovieCreateResponseSchema.model_validate(new_film)
 
 
 @router.patch("/movies/{movie_id}/")
